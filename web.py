@@ -10,10 +10,25 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         return dict(parse_qsl(self.url().query))
 
     def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
-        self.end_headers()
-        self.wfile.write(self.get_response().encode("utf-8"))
+        if self.valida_autor():
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.end_headers()
+            self.wfile.write(self.get_response().encode("utf-8"))
+        else:
+            self.send_error(404, "el autor no existe")
+    
+    def valida_autor(self):
+        if "autor" in self.query_data():
+            return True
+        else:
+            return False
+    
+    def get_html(self, path, qs):
+        
+        return f"""
+        <h1>Proyecto: {path} Autor: {qs['autor']}</h1>
+"""
 
     def get_response(self):
         return f"""
