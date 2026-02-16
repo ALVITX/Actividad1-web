@@ -10,21 +10,44 @@ class WebRequestHandler(BaseHTTPRequestHandler):
         return dict(parse_qsl(self.url().query))
 
     def do_GET(self):
-        if self.path == "/":
-            try:
-                with open("home.html", "r", encoding="utf-8") as file:
-                    content = file.read()
-                    
-                self.send_response(200)
-                self.send_header("Content-Type", "text/html; charset=utf-8")
-                self.end_headers()
-                self.wfile.write(content.encode("utf-8"))
 
-            except FileNotFoundError:
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(b"<h1>Error 500: home.html no encontrado</h1>")
+        contenido = {}
 
+        try:
+            with open("home.html", "r", encoding="utf-8") as f:
+                contenido["/"] = f.read()
+
+            with open("1.html", "r", encoding="utf-8") as f:
+                contenido["/proyecto/1"] = f.read()
+
+            contenido["/proyecto/2"] = """
+            <html>
+                <h1>Proyecto 2</h1>
+                <p>Contenido pendiente...</p>
+                <a href="/">Regresar</a>
+            </html>
+            """
+
+            contenido["/proyecto/3"] = """
+            <html>
+                <h1>Proyecto 3</h1>
+                <p>Contenido pendiente...</p>
+                <a href="/">Regresar</a>
+            </html>
+            """
+
+        except FileNotFoundError:
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(b"<h1>Error cargando archivos</h1>")
+            return
+
+
+        if self.path in contenido:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(contenido[self.path].encode("utf-8"))
         else:
             self.send_response(404)
             self.end_headers()
